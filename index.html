@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telvax: if it compiles, it fits</title>
+<meta name="description" content="Telvax is a statically typed, compiled language for data, ML pipelines and AI serving. Tensor shapes in the types, typed tables, and functions that become HTTP services.">
+<meta property="og:title" content="Telvax: if it compiles, it fits">
+<meta property="og:description" content="A statically typed, compiled language for data, ML pipelines and AI serving.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://telvax.github.io/website/assets/brand/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0E0F11">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/space-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="brand" href="./" aria-label="Telvax, home">
+    <svg aria-hidden="true" viewBox="-12 -7 58 36"><path d="M-5-5.5H-10.5V27.5H-5M39-5.5H44.5V27.5H39" fill="none" stroke="currentColor" stroke-width="3"/><path class="cells" d="M0 0h10v10H0zM12 0h10v10H12zM24 0h10v10H24zM12 12h10v10H12z"/></svg>
+    <span>telvax</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#why">Why</a>
+    <a href="#solutions">Solutions</a>
+    <a href="#tools">Tools</a>
+    <a href="#install">Install</a>
+    <a href="https://telvax.github.io/telvax/">Docs</a>
+    <a class="nav-cta" href="https://github.com/telvax/telvax">GitHub</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="hero grid-bg">
+  <div class="wrap">
+    <p class="label">A language for data, ML pipelines and AI serving <span>· early alpha</span></p>
+    <div class="hero-mark">
+      <svg role="img" aria-label="The Telvax symbol: a T made of a 2 by 3 tensor between brackets" viewBox="-12 -7 58 36"><path d="M-5-5.5H-10.5V27.5H-5M39-5.5H44.5V27.5H39" fill="none" stroke="currentColor" stroke-width="3"/><path class="cells" d="M0 0h10v10H0zM12 0h10v10H12zM24 0h10v10H24zM12 12h10v10H12z"/></svg>
+      <div>
+        <h1>telvax</h1>
+        <p class="slogan">If it compiles, it fits.</p>
+      </div>
+    </div>
+    <div class="hero-foot">
+      <p class="lead">Telvax reads like Python and checks like a compiled language. The shape of a tensor, the columns of a table and the body of an HTTP request are types, so the mistakes that usually show up in production show up in the editor.</p>
+      <div class="actions">
+        <a class="btn primary" href="#install">Install Telvax</a>
+        <a class="btn" href="https://telvax.github.io/telvax/guide/tour/">Take the tour</a>
+      </div>
+    </div>
+    <ul class="chips" aria-label="In short">
+      <li>Tensor[f32, 2, 3]</li>
+      <li>Table[Row]</li>
+      <li>@endpoint</li>
+      <li>.tvx</li>
+    </ul>
+  </div>
+</section>
+
+<section id="why" class="section">
+  <div class="wrap">
+    <p class="label">01 / the problem</p>
+    <h2>The shape bug you find an hour into a run is a compile error here.</h2>
+    <div class="split">
+      <div class="prose">
+        <p>A data and ML stack is usually three languages held together with glue: one for the model, one for the service around it, and SQL in strings between them. Each seam is checked only when the data reaches it.</p>
+        <p>Telvax puts the seams in the type system. A matrix product of mismatched shapes does not compile. A misspelled column does not compile. A request body that does not match its type never reaches your function.</p>
+        <ul class="proof">
+          <li><strong>Shape is type.</strong> <code>Tensor[f32, 2, 3]</code> carries its shape through every call.</li>
+          <li><strong>No glue code.</strong> One file holds the types, the pipeline and the route.</li>
+          <li><strong>Errors are values.</strong> <code>Result</code>, <code>Option</code> and <code>?</code>, with no exceptions to forget.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <figure class="code">
+          <figcaption>forward.tvx</figcaption>
+<pre data-tvx>fn layer1(x: Tensor[f32, 2, 3], w: Tensor[f32, 4, 4]) -> Tensor[f32, 2, 4]:
+    x.matmul(w).relu()</pre>
+        </figure>
+        <figure class="code error">
+          <figcaption>telvax check forward.tvx</figcaption>
+<pre>matmul inner dimensions differ: 3 and 4</pre>
+        </figure>
+        <p class="caption">Reported at the call, before anything runs. Sizes known only at run time use symbolic dimensions: <code>Tensor[f32, N, 3]</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solutions" class="section light">
+  <div class="wrap">
+    <p class="label">02 / solutions</p>
+    <h2>Four jobs, one language.</h2>
+    <p class="lead">Each of these is a program in the repository that you can run after the install.</p>
+    <div class="cards">
+
+      <article class="card">
+        <p class="label">Data analysis</p>
+        <h3>Tables with typed columns</h3>
+        <p><code>Table[Row]</code> is an Arrow table whose columns are the fields of <code>Row</code>. It reads CSV, Parquet and Arrow and runs SQL. <code>sales.prise</code> is a compile error, not a failure halfway through a report.</p>
+<pre data-tvx>type Sale:
+    region: Text
+    units: Int
+    price: Float
+
+fn main():
+    let sales: Table[Sale] = read_csv("sales.csv")
+    print(f"mean price: {sales.price.mean()}")</pre>
+        <a href="https://telvax.github.io/telvax/guide/use-cases/">Data analysis on tables</a>
+      </article>
+
+      <article class="card">
+        <p class="label">Machine learning</p>
+        <h3>Models whose shapes are checked</h3>
+        <p>Every layer states the shape it takes and the shape it returns. The checker follows them through the whole model, so a layer that does not fit the next one is caught when you save the file.</p>
+<pre data-tvx>fn layer1(x: Tensor[f32, 2, 3], w: Tensor[f32, 3, 4]) -> Tensor[f32, 2, 4]:
+    x.matmul(w).relu()
+
+fn layer2(h: Tensor[f32, 2, 4], w: Tensor[f32, 4, 2]) -> Tensor[f32, 2, 2]:
+    h.matmul(w).softmax()</pre>
+        <a href="https://telvax.github.io/telvax/guide/use-cases/">Shape-checked models</a>
+      </article>
+
+      <article class="card">
+        <p class="label">AI serving</p>
+        <h3>A function becomes an HTTP route</h3>
+        <p><code>@endpoint</code> turns a function into a JSON route. The parameter type is the request body and is validated for you; an <code>Err</code> becomes the right status code. <code>telvax build --serve</code> makes one binary and a Dockerfile.</p>
+<pre data-tvx>@endpoint(POST, "/v1/sentiment")
+fn sentiment(input: Input) -> Result[Output, Status]:
+    if input.text.is_empty():
+        return Err(Status.BadRequest("empty text"))
+    let score = score_of(input.text)
+    Ok(Output(label: label_of(score), score: score))</pre>
+        <a href="https://telvax.github.io/telvax/guide/use-cases/">Serving over HTTP</a>
+      </article>
+
+      <article class="card">
+        <p class="label">Retrieval and LLMs</p>
+        <h3>A RAG service in one file</h3>
+        <p>Embeddings, vector search and an LLM call, composed with the pipeline operator. The embedding size is in the type, so the model and the index cannot disagree about it.</p>
+<pre data-tvx>fn embed(text: Text) -> Tensor[f32, 768]:
+    text
+        |> std.text.clean_whitespace()
+        |> std.text.truncate(512)
+        |> embedder.embed()</pre>
+        <a href="https://github.com/telvax/telvax/blob/main/examples/rag-service.tvx">The full RAG service</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="statement">
+  <div class="wrap">
+    <p class="label">03 / the phrase</p>
+    <p class="big">If it compiles, it fits.</p>
+    <p class="pt" lang="pt-BR">PT — Se compila, serve.</p>
+    <div class="three">
+      <div><strong>Fits the type</strong><span>A wrong shape in a <code>matmul</code> is a compile error.</span></div>
+      <div><strong>Fits production</strong><span>A function with <code>@endpoint</code> is a validated HTTP route.</span></div>
+      <div><strong>Fits the way you write</strong><span>Blocks by indentation, no braces, no semicolons.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="tools" class="section">
+  <div class="wrap">
+    <p class="label">04 / tools</p>
+    <h2>One install. The tools come with it.</h2>
+    <p class="lead">There is no separate formatter to pick, test runner to configure or server framework to learn.</p>
+    <ul class="tools">
+      <li><strong>telvax check</strong><span>Type checker with exact spans</span></li>
+      <li><strong>telvax fmt</strong><span>Formatter</span></li>
+      <li><strong>telvax test</strong><span>Test runner with coverage</span></li>
+      <li><strong>telvax repl</strong><span>REPL</span></li>
+      <li><strong>telvax serve</strong><span>HTTP server for <code>@endpoint</code></span></li>
+      <li><strong>telvax build</strong><span>Native code with MLIR and LLVM</span></li>
+      <li><strong>tvpm</strong><span>Package manager with a lockfile</span></li>
+      <li><strong>Language server</strong><span>Hover, completion, go to definition</span></li>
+      <li><strong>VS Code extension</strong><span>Highlighting and inferred-type hints</span></li>
+      <li><strong>Debugger</strong><span>Over the Debug Adapter Protocol</span></li>
+      <li><strong>Profiler</strong><span>Where the time goes</span></li>
+      <li><strong>Jupyter kernel</strong><span>And the <code>%%telvax</code> magic</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="install" class="section grid-bg">
+  <div class="wrap">
+    <p class="label">05 / install</p>
+    <h2>Running in a minute.</h2>
+    <div class="split">
+      <div class="stack">
+        <figure class="code">
+          <figcaption>macOS and Linux</figcaption>
+<pre>curl -fsSL https://raw.githubusercontent.com/telvax/telvax/main/scripts/install.sh | sh
+export PATH="$HOME/.telvax/bin:$PATH"</pre>
+        </figure>
+        <figure class="code">
+          <figcaption>Windows (PowerShell)</figcaption>
+<pre>irm https://raw.githubusercontent.com/telvax/telvax/main/scripts/install.ps1 | iex</pre>
+        </figure>
+        <figure class="code">
+          <figcaption>Docker</figcaption>
+<pre>docker run --rm -v "$PWD:/work" -w /work ghcr.io/telvax/telvax run app.tvx main</pre>
+        </figure>
+      </div>
+      <div class="stack">
+        <figure class="code">
+          <figcaption>hello.tvx</figcaption>
+<pre data-tvx>fn main():
+    let names = ["Ada", "Alan", "Grace"]
+    for name in names:
+        print(f"hello, {name}")</pre>
+        </figure>
+        <figure class="code">
+          <figcaption>Run it</figcaption>
+<pre>telvax run hello.tvx main</pre>
+        </figure>
+        <p class="caption">Telvax is a command-line tool. The script installs <code>telvax</code> and <code>tvpm</code> in <code>~/.telvax/bin</code>.</p>
+      </div>
+    </div>
+    <aside class="alpha">
+      <p class="label">Early alpha</p>
+      <p>Good for trying the language and giving feedback. Expect bugs and breaking changes in the library and the tools; the syntax of edition 2026 is frozen. What works, and how it was verified, is listed in the <a href="https://github.com/telvax/telvax/blob/main/docs/design/status.md">status document</a>.</p>
+    </aside>
+    <div class="actions">
+      <a class="btn primary" href="https://telvax.github.io/telvax/guide/tour/">Take the tour</a>
+      <a class="btn" href="https://github.com/telvax/telvax">Star it on GitHub</a>
+      <a class="btn" href="https://github.com/telvax/telvax/discussions">Ask a question</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Telvax, home">
+      <svg aria-hidden="true" viewBox="-12 -7 58 36"><path d="M-5-5.5H-10.5V27.5H-5M39-5.5H44.5V27.5H39" fill="none" stroke="currentColor" stroke-width="3"/><path class="cells" d="M0 0h10v10H0zM12 0h10v10H12zM24 0h10v10H24zM12 12h10v10H12z"/></svg>
+      <span>telvax</span>
+    </a>
+    <nav aria-label="Links">
+      <a href="https://telvax.github.io/telvax/">Documentation</a>
+      <a href="https://telvax.github.io/telvax/reference/std/">Standard library</a>
+      <a href="https://github.com/telvax/telvax">Source</a>
+      <a href="https://github.com/telvax/rfcs">RFCs</a>
+      <a href="https://github.com/telvax/telvax/discussions">Discussions</a>
+      <a href="https://github.com/telvax/telvax/releases">Releases</a>
+    </nav>
+    <p class="label">MIT or Apache 2.0 · typed down to the tensor</p>
+  </div>
+</footer>
+
+<script src="highlight.js" defer></script>
+</body>
+</html>
