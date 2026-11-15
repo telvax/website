@@ -30,6 +30,7 @@ JetBrains Mono for code and uppercase labels; square corners.
 | `assets/brand/avatar.png`, `avatar.svg` | the avatar of the organization and app icon: the symbol without brackets, on Carbono |
 | `assets/brand/symbol-dark.svg` | the symbol with brackets, for a dark ground |
 | `assets/brand/symbol-light.svg` | the symbol in one color, for a light ground |
+| `assets/brand/social-preview.png` | the social preview of a repository (1280×640), uploaded by hand in the settings of each repository |
 | `favicon.svg` | the favicon |
 
 The fonts in `assets/fonts/` are under the SIL Open Font License (the two `OFL-*.txt` files).
